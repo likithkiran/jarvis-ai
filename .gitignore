@@ -1,0 +1,64 @@
+# ==============================
+# EDGE AI OS 2077
+# GitHub Ignore
+# ==============================
+
+# Secrets - NEVER upload
+.env
+.env.*
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+
+# Logs / runtime state
+*.log
+jarvis_state.txt
+
+# Backups
+*_BACKUP*
+*_BEFORE*
+*.bak
+
+# IDE
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Temporary
+*.tmp
+*.temp
+# EDGE AI OS local/runtime files
+_jarvis_wake_runtime.html
+
+# Backup / old working copies
+*_FINAL_WORKING.py
+*.BEFORE_*
+*.before-*
+*_current.txt
+
+# Patch / install scripts
+apply_*.ps1
+install_*.ps1
+repair_*.ps1
+cleanup_*.ps1
+
+# Local startup launchers
+start_jarvis.vbs
+start_jarvis_background.ps1
+launch_edge_ai.vbs
+
+# Local-only experimental files
+agent_current.txt
+index_current.txt
+style_current.txt

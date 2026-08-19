@@ -1,0 +1,1169 @@
+/* ============================================================
+   EDGE AI OS 2077
+   SPIDER VISION ENGINE
+   MediaPipe Hands + Gesture Detection + HUD Trail
+============================================================ */
+
+(() => {
+
+    "use strict";
+
+    console.log("EDGE AI OS 2077: Spider Vision loading...");
+
+    let video = null;
+    let canvas = null;
+    let ctx = null;
+
+    let hands = null;
+    let camera = null;
+
+    let running = false;
+
+    let lastGesture = "IDLE";
+    let lastAction = 0;
+
+    const ACTION_COOLDOWN = 1800;
+
+    const trail = [];
+
+    /* =========================================================
+       CREATE CAMERA HUD
+    ========================================================= */
+
+    function createVisionUI() {
+
+        if (document.getElementById("spider-vision")) {
+            return;
+        }
+
+        const panel = document.createElement("div");
+
+        panel.id = "spider-vision";
+
+        panel.innerHTML = `
+            <div class="spider-header">
+                <span>🕷 SPIDER VISION</span>
+                <span id="spider-status">OFFLINE</span>
+            </div>
+
+            <div class="spider-camera">
+                <video
+                    id="spider-video"
+                    autoplay
+                    muted
+                    playsinline>
+                </video>
+
+                <canvas id="spider-canvas"></canvas>
+
+                <div class="spider-overlay">
+                    <div class="scan-line"></div>
+                    <div class="corner tl"></div>
+                    <div class="corner tr"></div>
+                    <div class="corner bl"></div>
+                    <div class="corner br"></div>
+                </div>
+            </div>
+
+            <div class="spider-info">
+
+                <div>
+                    GESTURE
+                    <strong id="spider-gesture">
+                        IDLE
+                    </strong>
+                </div>
+
+                <div>
+                    HANDS
+                    <strong id="spider-hands">
+                        0
+                    </strong>
+                </div>
+
+            </div>
+        `;
+
+        document.body.appendChild(panel);
+
+        video =
+            document.getElementById("spider-video");
+
+        canvas =
+            document.getElementById("spider-canvas");
+
+        ctx =
+            canvas.getContext("2d");
+
+        addVisionStyles();
+    }
+
+
+    /* =========================================================
+       HUD CSS
+    ========================================================= */
+
+    function addVisionStyles() {
+
+        if (document.getElementById("spider-style")) {
+            return;
+        }
+
+        const style =
+            document.createElement("style");
+
+        style.id = "spider-style";
+
+        style.textContent = `
+
+            #spider-vision {
+
+                position: fixed;
+
+                right: 25px;
+                bottom: 25px;
+
+                width: 360px;
+
+                background:
+                    rgba(3, 12, 24, 0.94);
+
+                border:
+                    1px solid rgba(0,255,255,0.55);
+
+                box-shadow:
+                    0 0 20px rgba(0,255,255,0.20),
+                    inset 0 0 30px rgba(0,255,255,0.05);
+
+                border-radius: 14px;
+
+                padding: 10px;
+
+                z-index: 9999;
+
+                backdrop-filter:
+                    blur(12px);
+
+                font-family:
+                    Inter,
+                    Arial,
+                    sans-serif;
+
+                color:
+                    #00ffff;
+            }
+
+
+            .spider-header {
+
+                display: flex;
+
+                justify-content:
+                    space-between;
+
+                align-items: center;
+
+                font-family:
+                    Orbitron,
+                    sans-serif;
+
+                font-size: 11px;
+
+                letter-spacing:
+                    1.5px;
+
+                margin-bottom: 8px;
+            }
+
+
+            #spider-status {
+
+                color:
+                    #ff405f;
+            }
+
+
+            .spider-camera {
+
+                position: relative;
+
+                width: 100%;
+
+                aspect-ratio: 4 / 3;
+
+                overflow: hidden;
+
+                border-radius: 10px;
+
+                background:
+                    #02060b;
+
+                border:
+                    1px solid rgba(0,255,255,0.25);
+            }
+
+
+            #spider-video,
+            #spider-canvas {
+
+                position: absolute;
+
+                inset: 0;
+
+                width: 100%;
+                height: 100%;
+
+                object-fit: cover;
+            }
+
+
+            #spider-video {
+
+                transform:
+                    scaleX(-1);
+
+                opacity:
+                    0.65;
+            }
+
+
+            #spider-canvas {
+
+                pointer-events:
+                    none;
+            }
+
+
+            .spider-overlay {
+
+                position:
+                    absolute;
+
+                inset: 0;
+
+                pointer-events:
+                    none;
+            }
+
+
+            .scan-line {
+
+                position:
+                    absolute;
+
+                left: 0;
+                right: 0;
+
+                height: 2px;
+
+                background:
+                    rgba(0,255,255,0.45);
+
+                box-shadow:
+                    0 0 10px #00ffff;
+
+                animation:
+                    spiderScan 3s linear infinite;
+            }
+
+
+            @keyframes spiderScan {
+
+                from {
+                    top: 0;
+                }
+
+                to {
+                    top: 100%;
+                }
+            }
+
+
+            .corner {
+
+                position:
+                    absolute;
+
+                width: 22px;
+                height: 22px;
+
+                border-color:
+                    #00ffff;
+
+                border-style:
+                    solid;
+            }
+
+
+            .tl {
+                top: 8px;
+                left: 8px;
+                border-width: 2px 0 0 2px;
+            }
+
+
+            .tr {
+                top: 8px;
+                right: 8px;
+                border-width: 2px 2px 0 0;
+            }
+
+
+            .bl {
+                bottom: 8px;
+                left: 8px;
+                border-width: 0 0 2px 2px;
+            }
+
+
+            .br {
+                bottom: 8px;
+                right: 8px;
+                border-width: 0 2px 2px 0;
+            }
+
+
+            .spider-info {
+
+                display:
+                    flex;
+
+                justify-content:
+                    space-between;
+
+                margin-top:
+                    8px;
+
+                font-family:
+                    Orbitron,
+                    sans-serif;
+
+                font-size:
+                    9px;
+
+                letter-spacing:
+                    1px;
+            }
+
+
+            .spider-info strong {
+
+                display:
+                    block;
+
+                margin-top:
+                    3px;
+
+                color:
+                    #ffffff;
+
+                font-size:
+                    12px;
+            }
+
+
+            @media(max-width:900px) {
+
+                #spider-vision {
+
+                    width:
+                        calc(100% - 30px);
+
+                    right:
+                        15px;
+
+                    bottom:
+                        15px;
+                }
+            }
+
+        `;
+
+        document.head.appendChild(style);
+    }
+
+
+    /* =========================================================
+       MEDIAPIPE
+    ========================================================= */
+
+    function initializeHands() {
+
+        if (typeof Hands === "undefined") {
+
+            console.error(
+                "MediaPipe Hands not loaded."
+            );
+
+            return false;
+        }
+
+        hands = new Hands({
+
+            locateFile: file => {
+
+                return (
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/hands/"
+                    + file
+                );
+            }
+
+        });
+
+
+        hands.setOptions({
+
+            maxNumHands: 2,
+
+            modelComplexity: 1,
+
+            minDetectionConfidence: 0.6,
+
+            minTrackingConfidence: 0.6
+
+        });
+
+
+        hands.onResults(
+            processResults
+        );
+
+        return true;
+    }
+
+
+    /* =========================================================
+       PROCESS HAND RESULTS
+    ========================================================= */
+
+    function processResults(results) {
+
+        if (!canvas || !ctx) {
+            return;
+        }
+
+        const width =
+            canvas.width;
+
+        const height =
+            canvas.height;
+
+
+        ctx.clearRect(
+            0,
+            0,
+            width,
+            height
+        );
+
+
+        const handCount =
+            results.multiHandLandmarks
+                ? results.multiHandLandmarks.length
+                : 0;
+
+
+        const handsDisplay =
+            document.getElementById(
+                "spider-hands"
+            );
+
+        if (handsDisplay) {
+
+            handsDisplay.innerText =
+                handCount;
+        }
+
+
+        if (!handCount) {
+
+            updateGesture("IDLE");
+
+            drawTrail();
+
+            return;
+        }
+
+
+        for (
+            const landmarks
+            of results.multiHandLandmarks
+        ) {
+
+            drawHand(landmarks);
+
+            const center =
+                getHandCenter(
+                    landmarks
+                );
+
+            addTrailPoint(
+                center.x * width,
+                center.y * height
+            );
+
+            const gesture =
+                detectGesture(
+                    landmarks
+                );
+
+            updateGesture(
+                gesture
+            );
+        }
+
+
+        drawTrail();
+    }
+
+
+    /* =========================================================
+       DRAW HAND
+    ========================================================= */
+
+    function drawHand(landmarks) {
+
+        const connections =
+            [
+                [0,1],
+                [1,2],
+                [2,3],
+                [3,4],
+
+                [0,5],
+                [5,6],
+                [6,7],
+                [7,8],
+
+                [0,9],
+                [9,10],
+                [10,11],
+                [11,12],
+
+                [0,13],
+                [13,14],
+                [14,15],
+                [15,16],
+
+                [0,17],
+                [17,18],
+                [18,19],
+                [19,20]
+            ];
+
+
+        ctx.lineWidth = 2;
+
+        ctx.strokeStyle =
+            "rgba(0,255,255,0.75)";
+
+        ctx.fillStyle =
+            "#00ffff";
+
+
+        for (
+            const [a,b]
+            of connections
+        ) {
+
+            const p1 =
+                landmarks[a];
+
+            const p2 =
+                landmarks[b];
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                p1.x * canvas.width,
+                p1.y * canvas.height
+            );
+
+            ctx.lineTo(
+                p2.x * canvas.width,
+                p2.y * canvas.height
+            );
+
+            ctx.stroke();
+        }
+
+
+        for (
+            const point
+            of landmarks
+        ) {
+
+            ctx.beginPath();
+
+            ctx.arc(
+                point.x * canvas.width,
+                point.y * canvas.height,
+                3,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+        }
+    }
+
+
+    /* =========================================================
+       HAND CENTER
+    ========================================================= */
+
+    function getHandCenter(
+        landmarks
+    ) {
+
+        let x = 0;
+        let y = 0;
+
+        for (
+            const p
+            of landmarks
+        ) {
+
+            x += p.x;
+            y += p.y;
+        }
+
+        return {
+
+            x: x / landmarks.length,
+
+            y: y / landmarks.length
+        };
+    }
+
+
+    /* =========================================================
+       DISTANCE
+    ========================================================= */
+
+    function distance(a,b) {
+
+        const dx =
+            a.x - b.x;
+
+        const dy =
+            a.y - b.y;
+
+        return Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
+    }
+
+
+    /* =========================================================
+       GESTURE DETECTION
+    ========================================================= */
+
+    function detectGesture(
+        lm
+    ) {
+
+        const thumb =
+            distance(
+                lm[4],
+                lm[0]
+            );
+
+        const index =
+            distance(
+                lm[8],
+                lm[0]
+            );
+
+        const middle =
+            distance(
+                lm[12],
+                lm[0]
+            );
+
+        const ring =
+            distance(
+                lm[16],
+                lm[0]
+            );
+
+        const pinky =
+            distance(
+                lm[20],
+                lm[0]
+            );
+
+
+        /* PINCH */
+
+        if (
+            distance(
+                lm[4],
+                lm[8]
+            ) < 0.07
+        ) {
+
+            return "PINCH";
+        }
+
+
+        const fingersOpen =
+            [
+                index,
+                middle,
+                ring,
+                pinky
+            ]
+            .filter(
+                d => d > 0.35
+            )
+            .length;
+
+
+        /* OPEN PALM */
+
+        if (
+            fingersOpen >= 4
+        ) {
+
+            return "OPEN PALM";
+        }
+
+
+        /* FIST */
+
+        if (
+            fingersOpen === 0
+        ) {
+
+            return "FIST";
+        }
+
+
+        /* PEACE */
+
+        if (
+            index > 0.35 &&
+            middle > 0.35 &&
+            ring < 0.30 &&
+            pinky < 0.30
+        ) {
+
+            return "PEACE";
+        }
+
+
+        /* POINT */
+
+        if (
+            index > 0.38 &&
+            middle < 0.30 &&
+            ring < 0.30 &&
+            pinky < 0.30
+        ) {
+
+            return "POINT";
+        }
+
+
+        return "IDLE";
+    }
+
+
+    /* =========================================================
+       GESTURE UI
+    ========================================================= */
+
+    function updateGesture(
+        gesture
+    ) {
+
+        const element =
+            document.getElementById(
+                "spider-gesture"
+            );
+
+        if (element) {
+
+            element.innerText =
+                gesture;
+        }
+
+
+        if (
+            gesture === lastGesture
+        ) {
+
+            return;
+        }
+
+
+        lastGesture =
+            gesture;
+
+
+        console.log(
+            "SPIDER GESTURE:",
+            gesture
+        );
+
+
+        executeGesture(
+            gesture
+        );
+    }
+
+
+    /* =========================================================
+       GESTURE → EDGE AI
+    ========================================================= */
+
+    function executeGesture(
+        gesture
+    ) {
+
+        const now =
+            Date.now();
+
+
+        if (
+            now - lastAction
+            < ACTION_COOLDOWN
+        ) {
+
+            return;
+        }
+
+
+        let command =
+            null;
+
+
+        switch (gesture) {
+
+            case "OPEN PALM":
+
+                command =
+                    "show desktop";
+
+                break;
+
+
+            case "FIST":
+
+                command =
+                    "back";
+
+                break;
+
+
+            case "POINT":
+
+                command =
+                    "open chrome";
+
+                break;
+
+
+            case "PEACE":
+
+                command =
+                    "open youtube";
+
+                break;
+
+
+            case "PINCH":
+
+                command =
+                    "ping";
+
+                break;
+
+            default:
+
+                return;
+        }
+
+
+        lastAction =
+            now;
+
+
+        sendCommand(
+            command
+        );
+    }
+
+
+    /* =========================================================
+       SEND TO EXISTING EDGE AI
+    ========================================================= */
+
+    async function sendCommand(
+        command
+    ) {
+
+        try {
+
+            console.log(
+                "SPIDER COMMAND:",
+                command
+            );
+
+
+            const response =
+                await fetch(
+                    "/process_command",
+                    {
+
+                        method:
+                            "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                command:
+                                    command
+
+                            })
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "HTTP " +
+                    response.status
+                );
+            }
+
+
+            const data =
+                await response.json();
+
+
+            console.log(
+                "EDGE AI RESPONSE:",
+                data
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "SPIDER COMMAND ERROR:",
+                error
+            );
+        }
+    }
+
+
+    /* =========================================================
+       TRAIL
+    ========================================================= */
+
+    function addTrailPoint(
+        x,
+        y
+    ) {
+
+        trail.push({
+            x,
+            y,
+            life: 1
+        });
+
+
+        if (
+            trail.length > 60
+        ) {
+
+            trail.shift();
+        }
+    }
+
+
+    function drawTrail() {
+
+        if (
+            trail.length < 2
+        ) {
+
+            return;
+        }
+
+
+        for (
+            let i = 1;
+            i < trail.length;
+            i++
+        ) {
+
+            const a =
+                trail[i - 1];
+
+            const b =
+                trail[i];
+
+
+            const alpha =
+                i / trail.length;
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                a.x,
+                a.y
+            );
+
+            ctx.lineTo(
+                b.x,
+                b.y
+            );
+
+
+            ctx.strokeStyle =
+                `rgba(0,255,255,${alpha})`;
+
+            ctx.lineWidth =
+                2;
+
+
+            ctx.stroke();
+        }
+    }
+
+
+    /* =========================================================
+       CAMERA
+    ========================================================= */
+
+    async function startCamera() {
+
+        if (
+            !video ||
+            typeof Camera === "undefined"
+        ) {
+
+            console.error(
+                "MediaPipe Camera API unavailable."
+            );
+
+            return;
+        }
+
+
+        camera =
+            new Camera(
+                video,
+                {
+
+                    onFrame:
+                        async () => {
+
+                            if (
+                                hands &&
+                                running
+                            ) {
+
+                                await hands.send(
+                                    {
+                                        image:
+                                            video
+                                    }
+                                );
+                            }
+                        },
+
+                    width:
+                        640,
+
+                    height:
+                        480
+
+                }
+            );
+
+
+        camera.start();
+
+        running =
+            true;
+
+
+        const status =
+            document.getElementById(
+                "spider-status"
+            );
+
+        if (status) {
+
+            status.innerText =
+                "ONLINE";
+
+            status.style.color =
+                "#00ff88";
+        }
+    }
+
+
+    /* =========================================================
+       START ENGINE
+    ========================================================= */
+
+    function startSpiderVision() {
+
+        createVisionUI();
+
+        if (
+            !initializeHands()
+        ) {
+
+            return;
+        }
+
+
+        canvas.width =
+            640;
+
+        canvas.height =
+            480;
+
+
+        startCamera();
+
+        console.log(
+            "EDGE AI OS 2077: Spider Vision ONLINE"
+        );
+    }
+
+
+    /* =========================================================
+       WAIT FOR PAGE
+    ========================================================= */
+
+    window.addEventListener(
+        "load",
+        () => {
+
+            setTimeout(
+                startSpiderVision,
+                1200
+            );
+
+        }
+    );
+
+})();﻿

@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050b14">
+
+    <title>EDGE AI OS 2077</title>
+
+    <!-- Main CSS -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- =====================================================
+         ADDITIONAL HUD STYLES
+    ====================================================== -->
+
+
+
+</head>
+
+<body class="edge-v4">
+<div id="boot-screen"><div class="boot-core"><div class="hologram"></div><h1>EDGE AI OS 2077</h1><p id="boot-text">Initializing Neural Core...</p></div></div>
+
+<div class="v4-ambient" aria-hidden="true"><div class="v4-grid"></div><div class="v4-scan"></div><div class="v4-orb v4-orb-a"></div><div class="v4-orb v4-orb-b"></div></div>
+
+<div id="dashboard" class="v4-shell">
+  <header class="v4-topbar">
+    <div class="v4-brand"><span class="v4-brand-mark">◈</span><div><div class="logo">EDGE AI OS <em>2077</em></div><div class="v4-kicker">AUTONOMOUS NEURAL COMMAND SYSTEM</div></div></div>
+    <div class="v4-top-center"><span class="v4-chip">NEURAL LINK</span><span class="v4-chip hot">JARVIS CORE</span><span class="v4-chip">VISION READY</span></div>
+    <div class="system-time"><span id="clock">00:00:00</span><span class="connection-status"><span id="status-dot" class="status-dot"></span><span id="connection-text">WINDOWS ONLINE</span></span></div>
+  </header>
+
+  <div class="main-container v4-layout">
+    <aside class="v4-rail">
+      <div class="profile"><div class="ai-circle"><span>◉</span></div><h3>EDGE CORE</h3><p id="sidebar-status">Online</p></div>
+      <nav aria-label="EDGE navigation">
+        <button class="active" type="button"><span>⌂</span><b>CORE</b><small>Dashboard</small></button>
+        <button type="button"><span>✦</span><b>JARVIS</b><small>AI Assistant</small></button>
+        <button type="button"><span>◉</span><b>VISION</b><small>Spider Vision</small></button>
+        <button type="button"><span>◇</span><b>WORKSPACE</b><small>Neural Tools</small></button>
+        <button type="button"><span>⚙</span><b>SYSTEM</b><small>Settings</small></button>
+      </nav>
+      <div class="v4-rail-footer"><span></span> SECURE LINK<br><strong>ENCRYPTED // LOCAL</strong></div>
+    </aside>
+
+    <main class="chat-section v4-stage">
+      <div class="chat-header v4-stage-head"><div><span class="v4-eyebrow">NEURAL ASSISTANT // PRIMARY CORE</span><h2>JARVIS <i>INTERFACE</i></h2></div><span class="online-indicator">● ONLINE</span></div>
+
+      <section class="v4-reactor-zone" aria-label="Jarvis neural core">
+        <div class="v4-reactor-halo"></div><div class="v4-reticle r1"></div><div class="v4-reticle r2"></div><div class="v4-reticle r3"></div>
+        <div id="ai-core"><div class="v4-core-fallback"><span></span></div></div>
+        <div class="v4-core-label top">NEURAL MATRIX <b>STABLE</b></div><div class="v4-core-label left">LATENCY <b>12ms</b></div><div class="v4-core-label right">CORE SYNC <b>99.8%</b></div>
+      </section>
+
+      <section class="v4-conversation">
+        <div id="chat-box"><div id="chat-window" class="chat-messages"><div class="message ai-message"><b>EDGE AI</b><span>Hello. I am your intelligent assistant.</span></div></div></div>
+      </section>
+
+      <div class="v4-command-deck">
+        <div class="v4-command-glow"></div>
+        <div class="input-area"><span class="v4-prompt">✦</span><input id="user-input" type="text" placeholder="Ask Jarvis anything..." autocomplete="off"><button id="voice-btn" class="voice-btn" type="button" title="Voice command" aria-label="Voice command"><span class="v4-mic-icon">◉</span><span class="v4-mic-text">JARVIS</span></button><button id="send-btn" type="button" aria-label="Send command">➤</button></div>
+        <div class="command-label"><span>VOICE</span><span>NATURAL LANGUAGE</span><span>WINDOWS CONTROL</span><span>VISION</span></div>
+      </div>
+    </main>
+
+    <section class="status-panel v4-right-stack">
+      <div class="card system-card v4-glass-card">
+        <div class="v4-card-title"><span>◈ SYSTEM MATRIX</span><small>LIVE TELEMETRY</small></div>
+        <div class="v4-metric-grid">
+          <div class="metric"><span>CPU</span><strong id="cpu-value">42%</strong><i></i></div>
+          <div class="metric"><span>MEMORY</span><strong id="memory-value">68%</strong><i></i></div>
+          <div class="metric"><span>AI STATUS</span><strong id="ai-status">ACTIVE <span aria-hidden="true">●</span></strong><i></i></div>
+          <div class="metric"><span>SYSTEM</span><strong id="device-status">ONLINE</strong><i></i></div>
+          <div class="metric wide"><span>MODEL</span><strong id="device-model">Windows Laptop</strong><i></i></div>
+        </div>
+      </div>
+
+      <div id="spider-vision-dock" class="v4-spider-dock"><div class="v4-dock-placeholder"><span class="v4-spider-icon">🕷</span><b>SPIDER VISION</b><small>Camera module initializing…</small></div></div>
+
+      <div class="card terminal v4-glass-card"><div class="v4-card-title"><span>▷ SYSTEM TERMINAL</span><small>REAL-TIME LOG</small></div><div id="terminal-output" class="logs"><p>&gt; EDGE AI OS interface connected.</p><p>&gt; AI Neural Assistant ready.</p><p>&gt; Windows control layer online.</p><p>&gt; Vision Engine ready.</p><p>&gt; Voice Engine ready.</p></div></div>
+    </section>
+  </div>
+</div>
+
+<!-- =====================================================
+     THREE.JS
+====================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js">
+</script>
+
+
+<!-- =====================================================
+     3D AI CORE
+====================================================== -->
+
+<script
+    src="{{ url_for('static', filename='js/threeScene.js') }}">
+</script>
+
+
+<!-- =====================================================
+     DASHBOARD ENGINE
+====================================================== -->
+
+<script
+    src="{{ url_for('static', filename='js/dashboard.js') }}">
+</script>
+
+
+<!-- =====================================================
+     MAIN APP ENGINE
+====================================================== -->
+
+<script
+    src="{{ url_for('static', filename='js/app.js') }}">
+</script>
+
+
+<!-- =====================================================
+     VOICE ENGINE + DEVICE MONITOR
+====================================================== -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const voiceButton =
+            document.getElementById("voice-btn");
+
+        const input =
+            document.getElementById("user-input");
+
+        const terminal =
+            document.getElementById("terminal-output");
+
+
+        if (!voiceButton || !input) {
+            return;
+        }
+
+
+        /* =================================================
+           BROWSER SPEECH RECOGNITION
+        ================================================= */
+
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+
+        if (!SpeechRecognition) {
+
+            voiceButton.title =
+                "Voice recognition is not supported";
+
+            voiceButton.addEventListener(
+                "click",
+                function () {
+
+                    addTerminal(
+                        "> Voice recognition is not supported."
+                    );
+
+                }
+            );
+
+            return;
+        }
+
+
+        const recognition =
+            new SpeechRecognition();
+
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-IN";
+
+
+        /* =================================================
+           HEY JARVIS WAKE MODE
+        ================================================= */
+
+        let wakeMode = true;
+        let waitingForCommand = false;
+        let recognitionRunning = false;
+        let restartTimer = null;
+        let speaking = false;
+
+
+        /* =================================================
+           JARVIS SPEECH
+        ================================================= */
+
+        function speakJarvis(text) {
+
+            if (!("speechSynthesis" in window)) {
+                return;
+            }
+
+            speaking = true;
+
+            try {
+                recognition.stop();
+            } catch (error) {
+                // Recognition may already be stopped.
+            }
+
+            window.speechSynthesis.cancel();
+
+            const speech =
+                new SpeechSynthesisUtterance(
+                    text
+                );
+
+            speech.rate = 0.90;
+            speech.pitch = 0.82;
+            speech.volume = 1;
+
+            speech.onend =
+                function () {
+
+                    speaking = false;
+
+                    if (wakeMode) {
+                        startRecognition(500);
+                    }
+                };
+
+            speech.onerror =
+                function () {
+
+                    speaking = false;
+
+                    if (wakeMode) {
+                        startRecognition(500);
+                    }
+                };
+
+            window.speechSynthesis.speak(
+                speech
+            );
+        }
+
+
+        /* =================================================
+           START RECOGNITION SAFELY
+        ================================================= */
+
+        function startRecognition(delay = 300) {
+
+            if (
+                !wakeMode ||
+                recognitionRunning ||
+                speaking
+            ) {
+                return;
+            }
+
+            if (restartTimer) {
+                clearTimeout(
+                    restartTimer
+                );
+            }
+
+            restartTimer =
+                setTimeout(
+                    function () {
+
+                        if (
+                            !wakeMode ||
+                            recognitionRunning ||
+                            speaking
+                        ) {
+                            return;
+                        }
+
+                        try {
+
+                            recognition.start();
+
+                        } catch (error) {
+
+                            console.log(
+                                "Recognition start ignored:",
+                                error.message
+                            );
+                        }
+
+                    },
+                    delay
+                );
+        }
+
+
+        /* =================================================
+           START LISTENING
+        ================================================= */
+
+        recognition.onstart =
+            function () {
+
+                recognitionRunning = true;
+
+                voiceButton.classList.add(
+                    "listening"
+                );
+
+                voiceButton.innerText =
+                    waitingForCommand
+                        ? "CMD"
+                        : "JARVIS";
+
+                /*
+                 * Recognition auto-restarts frequently.
+                 * Do not spam the SYSTEM TERMINAL on every restart.
+                 */
+            };
+
+
+        /* =================================================
+           RECEIVED VOICE
+        ================================================= */
+
+        recognition.onresult =
+            function (event) {
+
+                const transcript =
+                    event.results[0][0]
+                        .transcript
+                        .trim();
+
+                const spoken =
+                    transcript.toLowerCase();
+
+                addTerminal(
+                    "> HEARD: " +
+                    transcript
+                );
+
+
+                /* =========================================
+                   COMMAND MODE
+                ========================================= */
+
+                if (waitingForCommand) {
+
+                    waitingForCommand = false;
+
+                    input.value =
+                        transcript;
+
+                    addTerminal(
+                        "> JARVIS COMMAND: " +
+                        transcript
+                    );
+
+                    voiceButton.innerText =
+                        "JARVIS";
+
+                    const sendButton =
+                        document.getElementById(
+                            "send-btn"
+                        );
+
+                    if (sendButton) {
+
+                        sendButton.click();
+
+                    } else {
+
+                        addTerminal(
+                            "> Send button unavailable."
+                        );
+                    }
+
+                    return;
+                }
+
+
+                /* =========================================
+                   WAKE WORD DETECTION
+                ========================================= */
+
+                const wakeWords = [
+
+                    "hey jarvis",
+
+                    "hi jarvis",
+
+                    "hello jarvis",
+
+                    "jarvis"
+
+                ];
+
+                const wakeDetected =
+                    wakeWords.some(
+                        function (word) {
+
+                            return spoken.includes(
+                                word
+                            );
+                        }
+                    );
+
+
+                if (!wakeDetected) {
+
+                    addTerminal(
+                        "> Waiting for wake word: Hey Jarvis"
+                    );
+
+                    return;
+                }
+
+
+                /* =========================================
+                   WAKE WORD DETECTED
+                ========================================= */
+
+                waitingForCommand = true;
+
+                voiceButton.innerText =
+                    "CMD";
+
+                addTerminal(
+                    "> WAKE WORD DETECTED: HEY JARVIS"
+                );
+
+                speakJarvis(
+                    "I'm listening."
+                );
+            };
+
+
+        /* =================================================
+           VOICE ERROR
+        ================================================= */
+
+        recognition.onerror =
+            function (event) {
+
+                recognitionRunning = false;
+
+                if (
+                    event.error ===
+                    "no-speech"
+                ) {
+
+                    console.log(
+                        "Jarvis: no speech detected."
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    event.error ===
+                    "aborted"
+                ) {
+
+                    return;
+                }
+
+
+                if (
+                    event.error ===
+                    "not-allowed" ||
+                    event.error ===
+                    "service-not-allowed"
+                ) {
+
+                    wakeMode = false;
+
+                    voiceButton.classList.remove(
+                        "listening"
+                    );
+
+                    voiceButton.innerText =
+                        "MIC";
+
+                    addTerminal(
+                        "> Microphone permission denied."
+                    );
+
+                    return;
+                }
+
+
+                addTerminal(
+                    "> Voice error: " +
+                    event.error
+                );
+            };
+
+
+        /* =================================================
+           VOICE STOPPED
+        ================================================= */
+
+        recognition.onend =
+            function () {
+
+                recognitionRunning = false;
+
+                voiceButton.classList.remove(
+                    "listening"
+                );
+
+                if (waitingForCommand) {
+
+                    voiceButton.innerText =
+                        "CMD";
+
+                } else if (wakeMode) {
+
+                    voiceButton.innerText =
+                        "JARVIS";
+
+                } else {
+
+                    voiceButton.innerText =
+                        "MIC";
+                }
+
+
+                if (
+                    wakeMode &&
+                    !speaking
+                ) {
+
+                    startRecognition(
+                        450
+                    );
+                }
+            };
+
+
+        /* =================================================
+           JARVIS BUTTON
+        ================================================= */
+
+        voiceButton.addEventListener(
+            "click",
+            function () {
+
+                wakeMode = !wakeMode;
+
+
+                if (wakeMode) {
+
+                    waitingForCommand = false;
+
+                    voiceButton.innerText =
+                        "JARVIS";
+
+                    addTerminal(
+                        "> Hey Jarvis wake mode ENABLED."
+                    );
+
+                    speakJarvis(
+                        "Jarvis online."
+                    );
+
+
+                } else {
+
+                    waitingForCommand = false;
+
+                    voiceButton.innerText =
+                        "MIC";
+
+                    voiceButton.classList.remove(
+                        "listening"
+                    );
+
+                    addTerminal(
+                        "> Hey Jarvis wake mode DISABLED."
+                    );
+
+                    try {
+
+                        recognition.stop();
+
+                    } catch (error) {
+
+                        // Already stopped.
+                    }
+
+                    if (
+                        "speechSynthesis" in window
+                    ) {
+
+                        window.speechSynthesis.cancel();
+                    }
+                }
+
+            }
+        );
+
+
+        /* =================================================
+           AUTO START
+        ================================================= */
+
+        setTimeout(
+            function () {
+
+                voiceButton.innerText =
+                    "JARVIS";
+
+                addTerminal(
+                    "> Hey Jarvis wake mode ready."
+                );
+
+                addTerminal(
+                    '> Say "Hey Jarvis" to activate.'
+                );
+
+                startRecognition();
+
+            },
+            1800
+        );
+
+        /* =================================================
+           TERMINAL LOGGER
+        ================================================= */
+
+        function addTerminal(text) {
+
+            if (!terminal) {
+                return;
+            }
+
+
+            const line =
+                document.createElement("p");
+
+
+            line.textContent =
+                text;
+
+
+            terminal.appendChild(
+                line
+            );
+
+
+            terminal.scrollTop =
+                terminal.scrollHeight;
+        }
+
+    }
+);
+
+
+/* =========================================================
+   LIVE ANDROID DEVICE STATUS
+========================================================= */
+
+async function updateDeviceStatus() {
+
+    try {
+
+        const response =
+            await fetch("/device_status");
+
+
+        const data =
+            await response.json();
+
+
+        const dot =
+            document.getElementById(
+                "status-dot"
+            );
+
+
+        const connectionText =
+            document.getElementById(
+                "connection-text"
+            );
+
+
+        const deviceStatus =
+            document.getElementById(
+                "device-status"
+            );
+
+
+        const deviceModel =
+            document.getElementById(
+                "device-model"
+            );
+
+
+        const sidebarStatus =
+            document.getElementById(
+                "sidebar-status"
+            );
+
+
+        if (data.connected) {
+
+
+            if (dot) {
+
+                dot.classList.remove(
+                    "offline"
+                );
+
+            }
+
+
+            if (connectionText) {
+
+                connectionText.textContent =
+                    "WINDOWS ONLINE";
+
+            }
+
+
+            if (deviceStatus) {
+
+                deviceStatus.textContent =
+                    "ONLINE";
+
+            }
+
+
+            if (deviceModel) {
+
+                deviceModel.textContent =
+                    data.model ||
+                    "V2348";
+
+            }
+
+
+            if (sidebarStatus) {
+
+                sidebarStatus.textContent =
+                    "Online";
+
+            }
+
+        }
+
+        else {
+
+
+            if (dot) {
+
+                dot.classList.add(
+                    "offline"
+                );
+
+            }
+
+
+            if (connectionText) {
+
+                connectionText.textContent =
+                    "WINDOWS OFFLINE";
+
+            }
+
+
+            if (deviceStatus) {
+
+                deviceStatus.textContent =
+                    "OFFLINE";
+
+            }
+
+
+            if (deviceModel) {
+
+                deviceModel.textContent =
+                    "UNKNOWN";
+
+            }
+
+
+            if (sidebarStatus) {
+
+                sidebarStatus.textContent =
+                    "Offline";
+
+            }
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.log(
+            "Device status error:",
+            error
+        );
+
+    }
+}
+
+
+/* =========================================================
+   START DEVICE MONITOR
+========================================================= */
+
+updateDeviceStatus();
+
+
+setInterval(
+    updateDeviceStatus,
+    5000
+);
+
+</script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="{{ url_for('static', filename='js/neural_background.js') }}"></script>
+<script src="{{ url_for('static', filename='js/hud_polish.js') }}"></script>
+<script src="{{ url_for('static', filename='js/gesture_spider_web.js') }}"></script>
+<script src="{{ url_for('static', filename='js/jutsu_effects.js') }}"></script>
+<script src="{{ url_for('static', filename='js/reactor_intelligence.js') }}"></script>
+<script src="{{ url_for('static', filename='js/jarvis_ninjutsu_background_v5.js') }}"></script>
+<script src="{{ url_for('static', filename='js/demo_mode.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/jutsu_animation_v51.js') }}"></script>
+<script>
+console.log("EDGE AI OS 2077: gesture.js loaded");
+
+window.addEventListener("load", function () {
+    console.log("EDGE AI OS 2077: VFX layer ready");
+});
+</script>
+<script>
+(function(){
+  function dockSpiderVision(){
+    const dock=document.getElementById('spider-vision-dock');
+    const spider=document.getElementById('spider-vision');
+    if(!dock||!spider||spider.parentElement===dock) return;
+    const ph=dock.querySelector('.v4-dock-placeholder'); if(ph) ph.remove();
+    dock.appendChild(spider);
+    spider.classList.add('v4-docked-spider');
+  }
+  window.addEventListener('load',()=>{setTimeout(dockSpiderVision,1400);setTimeout(dockSpiderVision,2600);});
+  new MutationObserver(dockSpiderVision).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+</body>
+</html>

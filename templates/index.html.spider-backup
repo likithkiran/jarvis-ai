@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050b14">
+
+    <title>EDGE AI OS 2077</title>
+
+    <!-- Main CSS -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- =====================================================
+         ADDITIONAL HUD STYLES
+    ====================================================== -->
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
+        /* =================================================
+           VOICE BUTTON
+        ================================================= */
+
+        .voice-btn {
+
+            width: 52px;
+            height: 52px;
+
+            border-radius: 50%;
+
+            border: 1px solid rgba(0, 255, 255, 0.65);
+
+            background: rgba(0, 255, 255, 0.08);
+
+            color: #00ffff;
+
+            font-size: 20px;
+
+            cursor: pointer;
+
+            transition: all 0.25s ease;
+
+            box-shadow:
+                0 0 12px rgba(0, 255, 255, 0.20);
+
+            flex-shrink: 0;
+        }
+
+        .voice-btn:hover {
+
+            transform: scale(1.08);
+
+            background: rgba(0, 255, 255, 0.18);
+
+            box-shadow:
+                0 0 18px rgba(0, 255, 255, 0.60),
+                0 0 35px rgba(0, 255, 255, 0.20);
+        }
+
+        .voice-btn.listening {
+
+            background: rgba(255, 40, 90, 0.20);
+
+            border-color: #ff3264;
+
+            color: #ff3264;
+
+            animation: voicePulse 1s infinite;
+        }
+
+        @keyframes voicePulse {
+
+            0% {
+                box-shadow:
+                    0 0 5px rgba(255, 50, 100, 0.30);
+            }
+
+            50% {
+                box-shadow:
+                    0 0 25px rgba(255, 50, 100, 0.90),
+                    0 0 50px rgba(255, 50, 100, 0.30);
+            }
+
+            100% {
+                box-shadow:
+                    0 0 5px rgba(255, 50, 100, 0.30);
+            }
+        }
+
+        /* =================================================
+           INPUT
+        ================================================= */
+
+        .input-area {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            width: 100%;
+        }
+
+        .input-area input {
+
+            flex: 1;
+
+            min-width: 0;
+        }
+
+        /* =================================================
+           CONNECTION STATUS
+        ================================================= */
+
+        .connection-status {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            margin-left: 15px;
+
+            font-size: 10px;
+
+            letter-spacing: 1px;
+        }
+
+        .status-dot {
+
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #00ff88;
+
+            box-shadow:
+                0 0 10px #00ff88;
+        }
+
+        .status-dot.offline {
+
+            background: #ff3344;
+
+            box-shadow:
+                0 0 10px #ff3344;
+        }
+
+        .online-indicator {
+
+            color: #00ff88;
+
+            text-shadow:
+                0 0 10px #00ff88;
+        }
+
+        /* =================================================
+           COMMAND LABEL
+        ================================================= */
+
+        .command-label {
+
+            margin-top: 7px;
+
+            font-size: 9px;
+
+            letter-spacing: 2px;
+
+            opacity: 0.55;
+
+            text-align: center;
+        }
+
+        /* =================================================
+           CHAT MESSAGE ANIMATION
+        ================================================= */
+
+        .message {
+
+            animation:
+                messageIn 0.25s ease-out;
+        }
+
+        @keyframes messageIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =================================================
+           TERMINAL
+        ================================================= */
+
+        .logs {
+
+            overflow-y: auto;
+
+            max-height: 280px;
+        }
+
+        .logs p {
+
+            margin: 5px 0;
+        }
+
+        /* =================================================
+           MOBILE
+        ================================================= */
+
+        @media (max-width: 900px) {
+
+            .main-container {
+
+                grid-template-columns: 1fr !important;
+            }
+
+            aside {
+
+                display: none !important;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     BOOT SCREEN
+====================================================== -->
+
+<div id="boot-screen">
+
+    <div class="boot-core">
+
+        <div class="hologram"></div>
+
+        <h1>
+            EDGE AI OS 2077
+        </h1>
+
+        <p id="boot-text">
+            Initializing Neural Core...
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MAIN DASHBOARD
+====================================================== -->
+
+<div id="dashboard">
+
+
+    <!-- =================================================
+         HEADER
+    ================================================== -->
+
+    <header>
+
+        <div class="logo">
+
+            ◈ EDGE AI OS 2077
+
+        </div>
+
+
+        <div class="system-time">
+
+            <span id="clock">
+                00:00:00
+            </span>
+
+
+            <span class="connection-status">
+
+                <span
+                    id="status-dot"
+                    class="status-dot">
+                </span>
+
+
+                <span id="connection-text">
+                    ANDROID ONLINE
+                </span>
+
+            </span>
+
+        </div>
+
+    </header>
+
+
+    <!-- =================================================
+         MAIN CONTAINER
+    ================================================== -->
+
+    <div class="main-container">
+
+
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
+
+        <aside>
+
+            <div class="profile">
+
+
+                <div class="ai-circle">
+
+                    &#9673;
+
+                </div>
+
+
+                <h3>
+                    EDGE CORE
+                </h3>
+
+
+                <p id="sidebar-status">
+                    Online
+                </p>
+
+            </div>
+
+
+            <nav>
+
+                <button type="button">
+                    &#9632; Dashboard
+                </button>
+
+
+                <button type="button">
+                    &#9670; AI Chat
+                </button>
+
+
+                <button type="button">
+                    &#9673; Neural Engine
+                </button>
+
+
+                <button type="button">
+                    &#9881; Settings
+                </button>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- =================================================
+             AI ASSISTANT
+        ================================================== -->
+
+        <section class="chat-section">
+
+
+            <!-- CHAT HEADER -->
+
+            <div class="chat-header">
+
+                <h2>
+                    Neural Assistant
+                </h2>
+
+
+                <span class="online-indicator">ONLINE</span>
+
+            </div>
+
+
+            <!-- =================================================
+                 3D AI CORE
+            ================================================== -->
+
+            <div id="ai-core">
+
+                <!-- Three.js renders here -->
+
+            </div>
+
+
+            <!-- =================================================
+                 CHAT BOX
+            ================================================== -->
+
+            <div id="chat-box">
+
+                <div
+                    id="chat-window"
+                    class="chat-messages"
+                >
+
+                    <div class="message ai-message">
+
+                        <b>
+                            EDGE AI:
+                        </b>
+
+                        Hello. I am your intelligent assistant.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 INPUT AREA
+            ================================================== -->
+
+            <div class="input-area">
+
+
+                <input
+                    id="user-input"
+                    type="text"
+                    placeholder="Command EDGE AI..."
+                    autocomplete="off"
+                >
+
+
+                <!-- VOICE BUTTON -->
+
+                <button
+                    id="voice-btn"
+                    class="voice-btn"
+                    type="button"
+                    title="Voice command"
+                    aria-label="Voice command"
+                >
+
+                    MIC
+
+                </button>
+
+
+                <!-- SEND BUTTON -->
+
+                <button
+                    id="send-btn"
+                    type="button"
+                    aria-label="Send command"
+                >
+
+                    &#10148;
+
+                </button>
+
+            </div>
+
+
+            <div class="command-label">
+
+                VOICE  NATURAL LANGUAGE  ANDROID CONTROL
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             STATUS PANEL
+        ================================================== -->
+
+        <section class="status-panel">
+
+
+            <!-- =================================================
+                 SYSTEM MONITOR
+            ================================================== -->
+
+            <div class="card system-card">
+
+
+                <h3>
+                    &#9881; SYSTEM MONITOR
+                </h3>
+
+
+                <div class="metric">
+
+                    <span>
+                        CPU
+                    </span>
+
+                    <strong id="cpu-value">
+                        42%
+                    </strong>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <span>
+                        MEMORY
+                    </span>
+
+                    <strong id="memory-value">
+                        68%
+                    </strong>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <span>
+                        AI STATUS
+                    </span>
+
+                    <strong id="ai-status">
+                        ACTIVE <span aria-hidden="true">&#9679;</span>
+                    </strong>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <span>
+                        ANDROID
+                    </span>
+
+                    <strong id="device-status">
+                        ONLINE
+                    </strong>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <span>
+                        MODEL
+                    </span>
+
+                    <strong id="device-model">
+                        V2348
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SYSTEM TERMINAL
+            ================================================== -->
+
+            <div class="card terminal">
+
+
+                <h3>
+                    &#9654; SYSTEM TERMINAL
+                </h3>
+
+
+                <div
+                    id="terminal-output"
+                    class="logs"
+                >
+
+                    <p>
+                        &gt; Initializing EDGE AI OS...
+                    </p>
+
+                    <p>
+                        &gt; Scanning system resources...
+                    </p>
+
+                    <p>
+                        &gt; Neural Engine initialized...
+                    </p>
+
+                    <p>
+                        &gt; Vision Engine Online
+                    </p>
+
+                    <p>
+                        &gt; Voice Engine Ready
+                    </p>
+
+                    <p>
+                        &gt; Android Connected
+                    </p>
+
+                    <p>
+                        &gt; ADB Control Layer Online
+                    </p>
+
+                    <p>
+                        &gt; Generic App Launcher Online
+                    </p>
+
+                    <p>
+                        &gt; Generic Website Launcher Online
+                    </p>
+
+                    <p>
+                        &gt; System Ready
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     THREE.JS
+====================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js">
+</script>
+
+
+<!-- =====================================================
+     3D AI CORE
+====================================================== -->
+
+<script
+    src="{{ url_for('static', filename='js/threeScene.js') }}">
+</script>
+
+
+<!-- =====================================================
+     DASHBOARD ENGINE
+====================================================== -->
+
+<script
+    src="{{ url_for('static', filename='js/dashboard.js') }}">
+</script>
+
+
+<!-- =====================================================
+     MAIN APP ENGINE
+====================================================== -->
+
+<script
+    src="{{ url_for('static', filename='js/app.js') }}">
+</script>
+
+
+<!-- =====================================================
+     VOICE ENGINE + DEVICE MONITOR
+====================================================== -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const voiceButton =
+            document.getElementById("voice-btn");
+
+        const input =
+            document.getElementById("user-input");
+
+        const terminal =
+            document.getElementById("terminal-output");
+
+
+        if (!voiceButton || !input) {
+            return;
+        }
+
+
+        /* =================================================
+           BROWSER SPEECH RECOGNITION
+        ================================================= */
+
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+
+        if (!SpeechRecognition) {
+
+            voiceButton.title =
+                "Voice recognition is not supported";
+
+            voiceButton.addEventListener(
+                "click",
+                function () {
+
+                    addTerminal(
+                        "> Voice recognition is not supported."
+                    );
+
+                }
+            );
+
+            return;
+        }
+
+
+        const recognition =
+            new SpeechRecognition();
+
+
+        recognition.continuous = false;
+
+        recognition.interimResults = false;
+
+        recognition.lang = "en-IN";
+
+
+        /* =================================================
+           START LISTENING
+        ================================================= */
+
+        recognition.onstart =
+            function () {
+
+                voiceButton.classList.add(
+                    "listening"
+                );
+
+                voiceButton.innerText = "MIC";
+
+                addTerminal(
+                    "> Voice engine listening..."
+                );
+            };
+
+
+        /* =================================================
+           RECEIVED VOICE
+        ================================================= */
+
+        recognition.onresult =
+            function (event) {
+
+                const transcript =
+                    event.results[0][0]
+                        .transcript
+                        .trim();
+
+
+                input.value =
+                    transcript;
+
+
+                addTerminal(
+                    "> VOICE COMMAND: " +
+                    transcript
+                );
+
+
+                /*
+                 * IMPORTANT:
+                 * Use the existing send button.
+                 *
+                 * Therefore your current app.js
+                 * continues to control /process_command.
+                 */
+
+                const sendButton =
+                    document.getElementById(
+                        "send-btn"
+                    );
+
+
+                if (sendButton) {
+
+                    sendButton.click();
+
+                }
+            };
+
+
+        /* =================================================
+           VOICE ERROR
+        ================================================= */
+
+        recognition.onerror =
+            function (event) {
+
+                addTerminal(
+                    "> Voice error: " +
+                    event.error
+                );
+
+            };
+
+
+        /* =================================================
+           VOICE STOPPED
+        ================================================= */
+
+        recognition.onend =
+            function () {
+
+                voiceButton.classList.remove(
+                    "listening"
+                );
+
+                voiceButton.innerText =
+                    "MIC";
+
+                addTerminal(
+                    "> Voice engine ready."
+                );
+
+            };
+
+
+        /* =================================================
+           MICROPHONE BUTTON
+        ================================================= */
+
+        voiceButton.addEventListener(
+            "click",
+            function () {
+
+                try {
+
+                    recognition.start();
+
+                } catch (error) {
+
+                    console.log(
+                        "Voice recognition already running."
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =================================================
+           TERMINAL LOGGER
+        ================================================= */
+
+        function addTerminal(text) {
+
+            if (!terminal) {
+                return;
+            }
+
+
+            const line =
+                document.createElement("p");
+
+
+            line.textContent =
+                text;
+
+
+            terminal.appendChild(
+                line
+            );
+
+
+            terminal.scrollTop =
+                terminal.scrollHeight;
+        }
+
+    }
+);
+
+
+/* =========================================================
+   LIVE ANDROID DEVICE STATUS
+========================================================= */
+
+async function updateDeviceStatus() {
+
+    try {
+
+        const response =
+            await fetch("/device_status");
+
+
+        const data =
+            await response.json();
+
+
+        const dot =
+            document.getElementById(
+                "status-dot"
+            );
+
+
+        const connectionText =
+            document.getElementById(
+                "connection-text"
+            );
+
+
+        const deviceStatus =
+            document.getElementById(
+                "device-status"
+            );
+
+
+        const deviceModel =
+            document.getElementById(
+                "device-model"
+            );
+
+
+        const sidebarStatus =
+            document.getElementById(
+                "sidebar-status"
+            );
+
+
+        if (data.connected) {
+
+
+            if (dot) {
+
+                dot.classList.remove(
+                    "offline"
+                );
+
+            }
+
+
+            if (connectionText) {
+
+                connectionText.textContent =
+                    "ANDROID ONLINE";
+
+            }
+
+
+            if (deviceStatus) {
+
+                deviceStatus.textContent =
+                    "ONLINE";
+
+            }
+
+
+            if (deviceModel) {
+
+                deviceModel.textContent =
+                    data.model ||
+                    "V2348";
+
+            }
+
+
+            if (sidebarStatus) {
+
+                sidebarStatus.textContent =
+                    "Online";
+
+            }
+
+        }
+
+        else {
+
+
+            if (dot) {
+
+                dot.classList.add(
+                    "offline"
+                );
+
+            }
+
+
+            if (connectionText) {
+
+                connectionText.textContent =
+                    "ANDROID OFFLINE";
+
+            }
+
+
+            if (deviceStatus) {
+
+                deviceStatus.textContent =
+                    "OFFLINE";
+
+            }
+
+
+            if (deviceModel) {
+
+                deviceModel.textContent =
+                    "UNKNOWN";
+
+            }
+
+
+            if (sidebarStatus) {
+
+                sidebarStatus.textContent =
+                    "Offline";
+
+            }
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.log(
+            "Device status error:",
+            error
+        );
+
+    }
+}
+
+
+/* =========================================================
+   START DEVICE MONITOR
+========================================================= */
+
+updateDeviceStatus();
+
+
+setInterval(
+    updateDeviceStatus,
+    5000
+);
+
+</script>
+
+
+</body>
+
+</html>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="{{ url_for('static', filename='js/gesture_spider_web.js') }}"></script>
+
+<script>
+console.log("EDGE AI OS 2077: gesture.js loaded");
+
+window.addEventListener("load", function () {
+    console.log("EDGE AI OS 2077: VFX layer ready");
+});
+</script>
+
