@@ -5,6 +5,11 @@
 > A futuristic AI assistant combining conversational intelligence, voice interaction, computer vision, gesture recognition, browser automation, and Windows system control inside an immersive neural HUD.
 
 ---
+## 🖥️ EDGE AI OS 2077 — Interface
+
+![EDGE AI OS 2077 Dashboard](assets/edge-ai-os-dashboard.png)
+
+---
 
 ## 🌐 Live Demo
 
