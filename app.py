@@ -1,4 +1,12 @@
-from flask import Flask, render_template, request, jsonify
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    send_from_directory,
+)
+
+import platform
 
 from laptop_agent import LaptopAgent
 from gemini_brain import GeminiBrain
@@ -16,6 +24,10 @@ SERVER_NAME_DISPLAY = (
 )
 
 SERVER_VERSION = "2077.1"
+
+IS_WINDOWS = (
+    platform.system().lower() == "windows"
+)
 
 
 # ============================================================
@@ -116,7 +128,7 @@ def looks_like_action(text):
     if command.startswith(
         (
             "http://",
-            "https://"
+            "https://",
         )
     ):
         return True
@@ -131,20 +143,20 @@ def extract_laptop_response(result):
 
     if isinstance(
         result,
-        str
+        str,
     ):
         return result
 
     if isinstance(
         result,
-        dict
+        dict,
     ):
 
         for key in (
             "response",
             "message",
             "result",
-            "status"
+            "status",
         ):
 
             value = result.get(
@@ -154,7 +166,7 @@ def extract_laptop_response(result):
             if (
                 isinstance(
                     value,
-                    str
+                    str,
                 )
                 and
                 value.strip()
@@ -180,14 +192,42 @@ def index():
 
 
 # ============================================================
+# GOOGLE / SEO FILES
+# ============================================================
+
+@app.route(
+    "/robots.txt",
+    methods=["GET"],
+)
+def robots_txt():
+
+    return send_from_directory(
+        app.static_folder,
+        "robots.txt",
+        mimetype="text/plain",
+    )
+
+
+@app.route(
+    "/sitemap.xml",
+    methods=["GET"],
+)
+def sitemap_xml():
+
+    return send_from_directory(
+        app.static_folder,
+        "sitemap.xml",
+        mimetype="application/xml",
+    )
+
+
+# ============================================================
 # DEVICE STATUS
-# Fixes:
-# GET /device_status 404
 # ============================================================
 
 @app.route(
     "/device_status",
-    methods=["GET"]
+    methods=["GET"],
 )
 def device_status():
 
@@ -201,6 +241,9 @@ def device_status():
             "success":
                 True,
 
+            "connected":
+                IS_WINDOWS,
+
             "server":
                 SERVER_NAME_DISPLAY,
 
@@ -211,13 +254,21 @@ def device_status():
                 "ONLINE",
 
             "device":
-                "Windows Laptop",
+                (
+                    "Windows Laptop"
+                    if IS_WINDOWS
+                    else "Cloud Server"
+                ),
 
             "model":
-                "Windows Laptop",
+                (
+                    "Windows Laptop"
+                    if IS_WINDOWS
+                    else "Render Cloud"
+                ),
 
             "platform":
-                "Windows",
+                platform.system(),
 
             "assistant":
                 "J.A.R.V.I.S.",
@@ -229,10 +280,18 @@ def device_status():
                 "ONLINE",
 
             "laptop_agent":
-                "ONLINE",
+                (
+                    "ONLINE"
+                    if IS_WINDOWS
+                    else "OFFLINE"
+                ),
 
             "windows_agent":
-                "ONLINE",
+                (
+                    "ONLINE"
+                    if IS_WINDOWS
+                    else "OFFLINE"
+                ),
 
             "spider_vision":
                 "READY",
@@ -241,14 +300,15 @@ def device_status():
                 "READY",
 
             "adb":
-                "NOT REQUIRED"
+                "NOT REQUIRED",
+
         }), 200
 
     except Exception as error:
 
         print(
             "DEVICE STATUS ERROR:",
-            repr(error)
+            repr(error),
         )
 
         return jsonify({
@@ -259,6 +319,9 @@ def device_status():
             "success":
                 False,
 
+            "connected":
+                False,
+
             "server":
                 SERVER_NAME_DISPLAY,
 
@@ -266,7 +329,7 @@ def device_status():
                 "ERROR",
 
             "error":
-                str(error)
+                str(error),
 
         }), 500
 
@@ -277,7 +340,7 @@ def device_status():
 
 @app.route(
     "/system_status",
-    methods=["GET"]
+    methods=["GET"],
 )
 def system_status():
 
@@ -299,13 +362,17 @@ def system_status():
             "J.A.R.V.I.S.",
 
         "platform":
-            "Windows Laptop",
+            platform.system(),
 
         "gemini":
             "ONLINE",
 
         "windows_agent":
-            "ONLINE",
+            (
+                "ONLINE"
+                if IS_WINDOWS
+                else "OFFLINE"
+            ),
 
         "spider_vision":
             "READY",
@@ -314,7 +381,8 @@ def system_status():
             "READY",
 
         "status":
-            "ONLINE"
+            "ONLINE",
+
     })
 
 
@@ -324,7 +392,7 @@ def system_status():
 
 @app.route(
     "/health",
-    methods=["GET"]
+    methods=["GET"],
 )
 def health():
 
@@ -340,7 +408,7 @@ def health():
             SERVER_VERSION,
 
         "status":
-            "ONLINE"
+            "ONLINE",
 
     }), 200
 
@@ -351,7 +419,7 @@ def health():
 
 @app.route(
     "/process_command",
-    methods=["POST"]
+    methods=["POST"],
 )
 def process_command():
 
@@ -364,10 +432,9 @@ def process_command():
         command = clean_text(
             data.get(
                 "command",
-                ""
+                "",
             )
         )
-
 
         if not command:
 
@@ -377,7 +444,7 @@ def process_command():
                     False,
 
                 "response":
-                    "No command received."
+                    "No command received.",
 
             }), 400
 
@@ -386,16 +453,20 @@ def process_command():
 
         print(
             "YOU:",
-            command
+            command,
         )
 
 
         # ====================================================
-        # 1. FAST LOCAL WINDOWS ACTION
+        # 1. WINDOWS LOCAL ACTION
         # ====================================================
 
-        if looks_like_action(
-            command
+        if (
+            looks_like_action(
+                command
+            )
+            and
+            IS_WINDOWS
         ):
 
             print(
@@ -416,7 +487,7 @@ def process_command():
 
                 print(
                     "EDGE AI:",
-                    response_text
+                    response_text,
                 )
 
                 return jsonify({
@@ -431,7 +502,8 @@ def process_command():
                         "action",
 
                     "response":
-                        response_text
+                        response_text,
+
                 })
 
 
@@ -441,7 +513,7 @@ def process_command():
                     "LOCAL ACTION ERROR:",
                     repr(
                         local_error
-                    )
+                    ),
                 )
 
 
@@ -457,7 +529,7 @@ def process_command():
 
                     print(
                         "AI COMMAND:",
-                        ai_command
+                        ai_command,
                     )
 
 
@@ -475,7 +547,7 @@ def process_command():
 
                     print(
                         "EDGE AI:",
-                        response_text
+                        response_text,
                     )
 
 
@@ -494,7 +566,8 @@ def process_command():
                             ai_command,
 
                         "response":
-                            response_text
+                            response_text,
+
                     })
 
 
@@ -504,7 +577,7 @@ def process_command():
                         "ACTION AI ERROR:",
                         repr(
                             ai_action_error
-                        )
+                        ),
                     )
 
                     return jsonify({
@@ -519,13 +592,51 @@ def process_command():
                             (
                                 "I could not complete "
                                 "that Windows action."
-                            )
+                            ),
 
                     }), 500
 
 
         # ====================================================
-        # 2. NATURAL AI CONVERSATION
+        # 2. CLOUD ACTION FALLBACK
+        # ====================================================
+
+        if (
+            looks_like_action(
+                command
+            )
+            and
+            not IS_WINDOWS
+        ):
+
+            print(
+                "ROUTER: PUBLIC WEB / CLOUD"
+            )
+
+            return jsonify({
+
+                "ok":
+                    True,
+
+                "server":
+                    SERVER_NAME_DISPLAY,
+
+                "type":
+                    "public",
+
+                "response":
+                    (
+                        "Windows control is unavailable "
+                        "in public web mode. Browser-supported "
+                        "commands are handled directly by the "
+                        "EDGE AI web interface."
+                    ),
+
+            })
+
+
+        # ====================================================
+        # 3. NATURAL AI CONVERSATION
         # ====================================================
 
         print(
@@ -548,7 +659,7 @@ def process_command():
 
             print(
                 "JARVIS:",
-                reply
+                reply,
             )
 
 
@@ -564,7 +675,8 @@ def process_command():
                     "conversation",
 
                 "response":
-                    reply
+                    reply,
+
             })
 
 
@@ -574,7 +686,7 @@ def process_command():
                 "GEMINI CHAT ERROR:",
                 repr(
                     chat_error
-                )
+                ),
             )
 
             return jsonify({
@@ -588,9 +700,8 @@ def process_command():
                 "response":
                     (
                         "My conversational intelligence "
-                        "is temporarily unavailable, "
-                        "but Windows control is still online."
-                    )
+                        "is temporarily unavailable."
+                    ),
 
             }), 500
 
@@ -601,7 +712,7 @@ def process_command():
             "PROCESS ERROR:",
             repr(
                 error
-            )
+            ),
         )
 
         return jsonify({
@@ -616,18 +727,18 @@ def process_command():
                 (
                     "Jarvis encountered "
                     "an internal error."
-                )
+                ),
 
         }), 500
 
 
 # ============================================================
-# SIMPLE API INFO
+# SERVER INFO
 # ============================================================
 
 @app.route(
     "/server",
-    methods=["GET"]
+    methods=["GET"],
 )
 def server_info():
 
@@ -646,22 +757,28 @@ def server_info():
             "J.A.R.V.I.S.",
 
         "mode":
-            "ACTION + CONVERSATION",
+            (
+                "WINDOWS + AI"
+                if IS_WINDOWS
+                else "PUBLIC WEB + AI"
+            ),
 
         "platform":
-            "Windows",
+            platform.system(),
 
         "status":
-            "ONLINE"
+            "ONLINE",
+
     })
 
 
 # ============================================================
 # FAVICON
-# Prevent unnecessary favicon 404
 # ============================================================
 
-@app.route("/favicon.ico")
+@app.route(
+    "/favicon.ico"
+)
 def favicon():
 
     return "", 204
@@ -713,7 +830,12 @@ if __name__ == "__main__":
     )
 
     print(
-        "Laptop Agent : ONLINE"
+        "Laptop Agent : "
+        + (
+            "ONLINE"
+            if IS_WINDOWS
+            else "OFFLINE"
+        )
     )
 
     print(
@@ -725,7 +847,12 @@ if __name__ == "__main__":
     )
 
     print(
-        "Mode         : ACTION + CONVERSATION"
+        "Mode         : "
+        + (
+            "WINDOWS + AI"
+            if IS_WINDOWS
+            else "PUBLIC WEB + AI"
+        )
     )
 
     print(
@@ -745,7 +872,7 @@ if __name__ == "__main__":
     print()
 
     print(
-        "Server Status:"
+        "Device Status:"
     )
 
     print(
@@ -760,16 +887,8 @@ if __name__ == "__main__":
 
 
     app.run(
-
-        host=
-            "127.0.0.1",
-
-        port=
-            5000,
-
-        debug=
-            True,
-
-        use_reloader=
-            False
+        host="127.0.0.1",
+        port=5000,
+        debug=True,
+        use_reloader=False,
     )
